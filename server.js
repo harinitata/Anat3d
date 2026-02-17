@@ -1,42 +1,95 @@
-const express = require('express'); // This defines the library
-const { exec } = require('child_process'); // This allows running local files
-const cors = require('cors'); // This allows React to talk to this server
+const express = require('express');
+const { exec } = require('child_process');
+const cors = require('cors');
 const path = require('path');
 
-const app = express(); // THIS defines 'app' and fixes your error
+const app = express();
 const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
 
-// Your Launch Logic
+// 🔹 Blender + model paths
+const blenderExe = `"C:\\Program Files\\Blender Foundation\\Blender 5.0\\blender.exe"`;
+const modelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\heart.blend"`;
+
+// 🔹 Python script path
+const pythonScriptPath = path.join(__dirname, 'both2.py');
+
+// 🔹 IMPORTANT: exact Python that has cv2 installed
+const pythonExe = `"C:\\Users\\harin\\AppData\\Local\\Programs\\Python\\Python311\\python.exe"`;
+
+// =============================
+// Launch Blender only
+// =============================
+app.post('/api/launch-blender', (req, res) => {
+    console.log("--- Launching Blender ---");
+
+    const launchBlender = `${blenderExe} ${modelPath}`;
+
+    exec(launchBlender, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Blender Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
+    });
+
+    res.json({ status: "success", message: "Blender launching" });
+});
+
+// =============================
+// Launch Python only
+// =============================
+app.post('/api/launch-python', (req, res) => {
+    console.log("--- Launching Python ---");
+
+    const launchPython = `${pythonExe} "${pythonScriptPath}"`;
+
+    exec(launchPython, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Python Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
+    });
+
+    res.json({ status: "success", message: "Python script launching" });
+});
+
+// =============================
+// Launch BOTH (Blender + Python)
+// =============================
 app.post('/api/launch', (req, res) => {
     console.log("--- Anat3D Launch Sequence Started ---");
 
-    // 1. BLENDER CONFIGURATION
-    const blenderExe = `"C:\\Program Files\\Blender Foundation\\Blender 5.0\\blender.exe"`;
-    const modelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\heart.blend"`;
-
-    // 2. PYTHON CONFIGURATION
-    // Assumes both2.py is in C:\Anat3D\
-    const pythonScriptPath = path.join(__dirname, 'both2.py');
-    
     const launchBlender = `${blenderExe} ${modelPath}`;
-    const launchPython = `python "${pythonScriptPath}"`;
+    const launchPython = `${pythonExe} "${pythonScriptPath}"`;
 
-    // Execute Blender
-    exec(launchBlender, (error) => {
-        if (error) console.error(`Blender Error: ${error.message}`);
+    exec(launchBlender, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Blender Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
     });
 
-    // Execute Python
-    exec(launchPython, (error) => {
-        if (error) console.error(`Python Error: ${error.message}`);
+    exec(launchPython, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Python Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
     });
 
     res.json({ status: "success", message: "Anat3D Systems Initialized" });
 });
 
+// =============================
 app.listen(PORT, () => {
     console.log(`Backend Bridge active on http://localhost:${PORT}`);
 });
