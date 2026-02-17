@@ -11,7 +11,8 @@ app.use(express.json());
 
 // 🔹 Blender + model paths
 const blenderExe = `"C:\\Program Files\\Blender Foundation\\Blender 5.0\\blender.exe"`;
-const modelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\heart.blend"`;
+const heartModelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\heart.blend"`;
+const brainModelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\humanbrain.blend"`;
 
 // 🔹 Python script path
 const pythonScriptPath = path.join(__dirname, 'both2.py');
@@ -25,7 +26,7 @@ const pythonExe = `"C:\\Users\\harin\\AppData\\Local\\Programs\\Python\\Python31
 app.post('/api/launch-blender', (req, res) => {
     console.log("--- Launching Blender ---");
 
-    const launchBlender = `${blenderExe} ${modelPath}`;
+    const launchBlender = `${blenderExe} ${heartModelPath}`;
 
     exec(launchBlender, (error, stdout, stderr) => {
         if (error) {
@@ -65,7 +66,7 @@ app.post('/api/launch-python', (req, res) => {
 app.post('/api/launch', (req, res) => {
     console.log("--- Anat3D Launch Sequence Started ---");
 
-    const launchBlender = `${blenderExe} ${modelPath}`;
+    const launchBlender = `${blenderExe} ${heartModelPath}`;
     const launchPython = `${pythonExe} "${pythonScriptPath}"`;
 
     exec(launchBlender, (error, stdout, stderr) => {
@@ -87,6 +88,36 @@ app.post('/api/launch', (req, res) => {
     });
 
     res.json({ status: "success", message: "Anat3D Systems Initialized" });
+});
+
+// =============================
+// Launch Brain (Blender + Python)
+// =============================
+app.post('/api/launch-brain', (req, res) => {
+    console.log("--- Brain Launch Sequence Started ---");
+
+    const launchBlender = `${blenderExe} ${brainModelPath}`;
+    const launchPython = `${pythonExe} "${pythonScriptPath}"`;
+
+    exec(launchBlender, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Blender (Brain) Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
+    });
+
+    exec(launchPython, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Python (Brain) Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
+    });
+
+    res.json({ status: "success", message: "Brain Systems Initialized" });
 });
 
 // =============================
