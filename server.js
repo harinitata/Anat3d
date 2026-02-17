@@ -13,6 +13,7 @@ app.use(express.json());
 const blenderExe = `"C:\\Program Files\\Blender Foundation\\Blender 5.0\\blender.exe"`;
 const heartModelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\heart.blend"`;
 const brainModelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\humanbrain.blend"`;
+const mouthModelPath = `"C:\\Users\\harin\\OneDrive\\Desktop\\mouth.blend"`;
 
 // 🔹 Python script path
 const pythonScriptPath = path.join(__dirname, 'both2.py');
@@ -118,6 +119,36 @@ app.post('/api/launch-brain', (req, res) => {
     });
 
     res.json({ status: "success", message: "Brain Systems Initialized" });
+});
+
+// =============================
+// Launch Mouth (Blender + Python)
+// =============================
+app.post('/api/launch-mouth', (req, res) => {
+    console.log("--- Mouth Launch Sequence Started ---");
+
+    const launchBlender = `${blenderExe} ${mouthModelPath}`;
+    const launchPython = `${pythonExe} "${pythonScriptPath}"`;
+
+    exec(launchBlender, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Blender (Mouth) Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
+    });
+
+    exec(launchPython, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Python (Mouth) Error: ${error.message}`);
+            console.error(stderr);
+        } else {
+            console.log(stdout);
+        }
+    });
+
+    res.json({ status: "success", message: "Mouth Systems Initialized" });
 });
 
 // =============================
